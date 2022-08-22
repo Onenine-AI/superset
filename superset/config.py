@@ -244,7 +244,7 @@ PROXY_FIX_CONFIG = {"x_for": 1, "x_proto": 1, "x_host": 1, "x_port": 1, "x_prefi
 APP_NAME = "Superset"
 
 # Specify the App icon
-APP_ICON = "/static/assets/images/superset-logo-horiz.png"
+APP_ICON = "/static/assets/images/superset-logo-horizon.png"
 
 # Specify where clicking the logo would take the user
 # e.g. setting it to '/' would take the user to '/superset/welcome/'
@@ -683,9 +683,9 @@ LOG_LEVEL = "DEBUG"
 # ---------------------------------------------------
 # LOG_LEVEL = DEBUG, INFO, WARNING, ERROR, CRITICAL
 
-ENABLE_TIME_ROTATE = False
+ENABLE_TIME_ROTATE = True
 TIME_ROTATE_LOG_LEVEL = "DEBUG"
-FILENAME = os.path.join(DATA_DIR, "superset.log")
+FILENAME = "/var/log/superset.log"
 ROLLOVER = "midnight"
 INTERVAL = 1
 BACKUP_COUNT = 30
@@ -1396,24 +1396,9 @@ class CustomAuthDBView(AuthDBView):
         # conn.commit()
         # conn.close()
 
-        conn = connect( host="domain.databases.appdomain.cloud", # TryDB
-                        port= 30876, 
-                        user="user", 
-                        password="pass", 
-                        sslmode="verify-full", 
-                        sslrootcert="/root/.postgresql/root.crt", 
-                        database="testsup")
-        conn.set_isolation_level(0)
-        cur = conn.cursor()
-        statement = "CREATE DATABASE {0} WITH OWNER = 'ibm-cloud-base-user' ENCODING = 'UTF8' LC_COLLATE = 'C.UTF-8' LC_CTYPE = 'C.UTF-8' CONNECTION LIMIT = -1;".format(username)
-        cur.execute(statement)
-        conn.commit()
-        conn.close()
-
-        # ----------------------------------- #
         newDatabase=get_or_create_db(database_name=username,
                          sqlalchemy_uri="postgres://username:password@domain.databases.appdomain.cloud:30876/{0}?sslmode=verify-full".format(username))
-        newDatabase.allow_csv_upload = True
+        newDatabase.allow_file_upload = True
 
         from flask import Flask
         from flask_sqlalchemy import SQLAlchemy
