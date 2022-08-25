@@ -220,6 +220,7 @@ class DatabaseRestApi(BaseSupersetModelRestApi):
         action=lambda self, *args, **kwargs: f"{self.__class__.__name__}.post",
         log_to_statsd=False,
     )
+    @requires_json
     def post(self) -> Response:
         """Creates a new Database
         ---
@@ -245,8 +246,6 @@ class DatabaseRestApi(BaseSupersetModelRestApi):
                         type: number
                       result:
                         $ref: '#/components/schemas/{{self.__class__.__name__}}.post'
-            302:
-              description: Redirects to the current digest
             400:
               $ref: '#/components/responses/400'
             401:
@@ -256,10 +255,6 @@ class DatabaseRestApi(BaseSupersetModelRestApi):
             500:
               $ref: '#/components/responses/500'
         """
-        print('^^^^^^^^ in database post')
-
-        if not request.is_json:
-            return self.response_400(message="Request is not JSON")
         try:
             item = self.add_model_schema.load(request.json)
         # This validates custom Schema with custom validations
@@ -274,7 +269,6 @@ class DatabaseRestApi(BaseSupersetModelRestApi):
             # If parameters are available return them in the payload
             if new_model.parameters:
                 item["parameters"] = new_model.parameters
-
             # <--------- MODIFIED CODE --------------->
             role = self.appbuilder.sm.find_role(str(g.user.username))
             from flask_appbuilder.security.sqla.models import PermissionView
